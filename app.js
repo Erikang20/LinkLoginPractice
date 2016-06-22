@@ -2,11 +2,11 @@ var express = require( 'express' );
 var path = require( 'path' );
 var passport = require( 'passport' );
 var cookieSession = require( 'cookie-session' );
+var LinkedInStrategy = require( 'passport-linkedin' ).Strategy;
 var favicon = require( 'serve-favicon' );
 var logger = require( 'morgan' );
 var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
-var LinkedInStrategy = require( 'passport-linkedin' ).Strategy;
 
 require( 'dotenv' ).load();
 
