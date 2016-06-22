@@ -1,4 +1,5 @@
 var express = require( 'express' );
+var http = require( 'http' );
 var path = require( 'path' );
 var passport = require( 'passport' );
 var cookieSession = require( 'cookie-session' );
@@ -7,20 +8,19 @@ var favicon = require( 'serve-favicon' );
 var logger = require( 'morgan' );
 var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
+var app = express();
 
 require( 'dotenv' ).load();
 
 var auth = require( './routes/auth' );
-
-
 var routes = require( './routes/index' );
 var users = require( './routes/users' );
 
-var app = express();
 
 // view engine setup
 app.set( 'views', path.join( __dirname, 'views' ) );
-app.set( 'view engine', 'ejs' );
+app.use( express.static( path.join( __dirname, 'public' ) ) );
+app.set( 'view engine', 'hbs' );
 
 // uncomment after placing your favicon in /public
 // app.use( favicon( path.join( __dirname, 'public', 'favicon.ico' ) ) );
@@ -30,7 +30,7 @@ app.use( bodyParser.urlencoded( {
 	extended: false
 } ) );
 app.use( cookieParser() );
-app.use( express.static( path.join( __dirname, 'public' ) ) );
+
 
 
 //add to middleware area, after bodyparser, before routes
@@ -51,6 +51,7 @@ passport.deserializeUser( function( obj, done ) {
 	done( null, obj );
 } );
 
+// passport-linkedin Strategy
 passport.use( new LinkedInStrategy( {
 		consumerKey: process.env[ 'LINKEDIN_API_KEY' ],
 		consumerSecret: process.env[ 'LINKEDIN_SECRET_KEY' ],
@@ -66,12 +67,27 @@ passport.use( new LinkedInStrategy( {
 		return done( null, profile );
 	} ) );
 
-//mount auth.js middleware
-app.use( '/auth', auth );
 
 
 app.use( '/', routes );
 app.use( '/users', users );
+
+//mount auth.js middleware
+app.use( '/auth', auth );
+
+app.get( '/', function( req, res ) {
+	res.render( 'index', {
+		user: req.user
+	} );
+} );
+
+app.get( '/login', function( req, res ) {
+	res.render( 'login', {
+		user: req.user
+	} );
+} );
+
+
 
 // catch 404 and forward to error handler
 app.use( function( req, res, next ) {
